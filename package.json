@@ -4,10 +4,13 @@
   "description": "blogilistasovellus",
   "main": "index.js",
   "scripts": {
+<<<<<<< HEAD
     "start": "node index.js",
     "watch": "nodemon index.js",
     "lint": "eslint .",
     "lint-fix": "eslint --fix .",
+=======
+>>>>>>> f28686cdd8e7ec6e7556154df366ad8cdcce4278
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
@@ -32,4 +35,8 @@
     "url": "https://github.com/it-innoo/blogit/issues"
   },
   "homepage": "https://github.com/it-innoo/blogit#readme"
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> f28686cdd8e7ec6e7556154df366ad8cdcce4278
