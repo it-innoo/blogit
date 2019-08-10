@@ -2,7 +2,6 @@
 const dummy = blogs => 1
 
 const byLikes = (a, b) => b.likes - a.likes
-const byValue = (a, b) => b.value - a.value
 
 const totalLikes = blogs => blogs
   .map(blog => blog.likes)
@@ -42,9 +41,40 @@ const mostBlogs = (blogs) => {
   }
 }
 
+const mostLikes = (blogs) => {
+  if (blogs === undefined || blogs === null || blogs.length === 0) {
+    return null
+  }
+
+  const authors = blogs
+    .map(b => ({
+      author: b.author,
+      likes: b.likes,
+    }))
+
+  const likes = authors
+    .reduce((obj, name) => {
+      const o = obj
+      o[name.author] = o[name.author]
+        ? (o[name.author] + name.likes)
+        : name.likes
+      return o
+    }, {})
+
+  const max = Object.entries(likes)
+    .reduce((prev, current) => ((prev[1] > current[1])
+      ? prev : current))
+
+  return {
+    author: max[0],
+    likes: max[1],
+  }
+}
+
 module.exports = {
   dummy,
   favoriteBlog,
   mostBlogs,
+  mostLikes,
   totalLikes,
 }
