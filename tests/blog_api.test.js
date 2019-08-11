@@ -38,6 +38,16 @@ describe('when there are blogs saved', () => {
 
     expect(response.body.length).toBe(initialBlogs.length)
   })
+
+  test('identier is named id', async () => {
+    const response = await api.get('/api/blogs')
+
+    const ids = response.body.map(r => r.id)
+    expect(ids).toBeDefined()
+
+    const vs = response.body.map(r => r.__v)
+    expect(vs).toBeDefined()
+  })
 })
 
 afterAll(() => {
