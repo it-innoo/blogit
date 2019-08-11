@@ -122,3 +122,27 @@ describe('adding a new blog to bloglist', () => {
       .toBe(initialBlogs.length)
   })
 })
+
+describe('delete a blog from bloglist', () => {
+  it('succeeds with status code 204 if id is valid', async () => {
+    const blogsAtStart = await blogsInDb()
+    const blogToDelete = blogsAtStart[0]
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+
+    const blogsAtEnd = await blogsInDb()
+    expect(blogsAtEnd.length)
+      .toBe(initialBlogs.length - 1)
+
+    const title = blogsAtEnd.map(r => r.title)
+    expect(title).not.toContain(blogToDelete.title)
+  })
+
+  it('fails with status code 400 if id is invalid', async () => {
+    await api
+      .delete('/api/blogs/1')
+      .expect(400)
+  })
+})

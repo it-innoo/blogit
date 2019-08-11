@@ -23,6 +23,7 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :b
 
 logger.info('connecting to', config.MONGODB_URI)
 
+mongoose.set('useFindAndModify', false)
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
   .then((result) => {
     logger.info('connected to MongoDB', result.connections[0].host)
