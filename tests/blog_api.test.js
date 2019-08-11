@@ -79,12 +79,46 @@ describe('adding a new blog to bloglist', () => {
 
     const blogsAtEnd = await blogsInDb()
 
-    // const created = blogsAtEnd.find(equalTo(newBlog))
-
     const likes = blogsAtEnd
       .filter(r => r.title === newBlog.title)
       .map(r => r.likes)
 
     expect(likes[0]).toBe(0)
+  })
+
+  it('blog is not added without title', async () => {
+    const newBlog = {
+      author: 'Martin Fowler',
+      url: 'https://martinfowler.com/microservices/',
+      likes: 3,
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await blogsInDb()
+    expect(blogsAtEnd.length)
+      .toBe(initialBlogs.length)
+  })
+
+  it('blog is not added without url', async () => {
+    const newBlog = {
+      author: 'Martin Fowler',
+      title: 'Microservices Resource Guide',
+      likes: 3,
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await blogsInDb()
+    expect(blogsAtEnd.length)
+      .toBe(initialBlogs.length)
   })
 })
