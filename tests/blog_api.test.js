@@ -65,4 +65,26 @@ describe('adding a new blog to bloglist', () => {
         'Microservices Resource Guide',
       )
   })
+
+  it('likes get default value if not set', async () => {
+    const newBlog = {
+      author: 'Martin Fowler',
+      title: 'Microservices Resource Guide',
+      url: 'https://martinfowler.com/microservices/',
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+
+    const blogsAtEnd = await blogsInDb()
+
+    // const created = blogsAtEnd.find(equalTo(newBlog))
+
+    const likes = blogsAtEnd
+      .filter(r => r.title === newBlog.title)
+      .map(r => r.likes)
+
+    expect(likes[0]).toBe(0)
+  })
 })
