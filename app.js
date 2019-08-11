@@ -5,10 +5,13 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const morgan = require('morgan')
 const config = require('./utils/config')
-const middleware = require('./utils/middleware')
 const blogsRouter = require('./controllers/blogs')
+const middleware = require('./utils/middleware')
+const logger = require('./utils/logger')
+
 
 const app = express()
+logger.info(`Environment un app.js: ${process.env.NODE_ENV}`)
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -18,14 +21,14 @@ morgan
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-console.log('connecting to', config.MONGODB_URI)
+logger.info('connecting to', config.MONGODB_URI)
 
 mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
   .then((result) => {
-    console.log('connected to MongoDB', result.connections[0].host)
+    logger.info('connected to MongoDB', result.connections[0].host)
   })
   .catch((error) => {
-    console.log('error connecting to MongoDB:', error.message)
+    logger.error('error connecting to MongoDB:', error.message)
   })
 
 app.use('/api/blogs', blogsRouter)
