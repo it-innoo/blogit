@@ -1,24 +1,10 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
+const { initialBlogs, blogsInDb } = require('./test_helper')
 
 const api = supertest(app)
 const Blog = require('../models/blog')
-
-const initialBlogs = [
-  {
-    title: 'React patterns',
-    author: 'Michael Chan',
-    url: 'https://reactpatterns.com/',
-    likes: 7,
-  },
-  {
-    title: 'Go To Statement Considered Harmful',
-    author: 'Edsger W. Dijkstra',
-    url: 'http://www.u.arizona.edu/~rubinson/copyright_violations/Go_To_Considered_Harmful.html',
-    likes: 5,
-  },
-]
 
 beforeEach(async () => {
   await Blog.deleteMany({})
@@ -29,7 +15,11 @@ beforeEach(async () => {
   await Promise.all(promiseArray)
 })
 
-describe('when there are blogs saved', () => {
+afterAll(() => {
+  mongoose.connection.close()
+})
+
+describe('when there is a bloglist', () => {
   test('All blogs are returned as json', async () => {
     const response = await api
       .get('/api/blogs')
@@ -39,17 +29,40 @@ describe('when there are blogs saved', () => {
     expect(response.body.length).toBe(initialBlogs.length)
   })
 
-  test('identier is named id', async () => {
+  test('identifier is named id', async () => {
     const response = await api.get('/api/blogs')
 
     const ids = response.body.map(r => r.id)
     expect(ids).toBeDefined()
 
-    const vs = response.body.map(r => r.__v)
-    expect(vs).toBeDefined()
+    const oneBlog = response.body[0]
+    expect(oneBlog.__v).toBeUndefined()
   })
 })
 
-afterAll(() => {
-  mongoose.connection.close()
+describe('adding a new blog to bloglist', () => {
+  it('increases the blog count', async () => {
+    const newBlog = {
+      author: 'Martin Fowler',
+      title: 'Microservices Resource Guide',
+      url: 'https://martinfowler.com/microservices/',
+      likes: 3,
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const blogsAtEnd = await blogsInDb()
+    expect(blogsAtEnd.length)
+      .toBe(initialBlogs.length + 1)
+
+    const title = blogsAtEnd.map(r => r.title)
+    expect(title)
+      .toContain(
+        'Microservices Resource Guide',
+      )
+  })
 })
