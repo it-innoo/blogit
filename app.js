@@ -6,12 +6,13 @@ const mongoose = require('mongoose')
 const morgan = require('morgan')
 const config = require('./utils/config')
 const blogsRouter = require('./controllers/blogs')
+const usersRouter = require('./controllers/users')
 const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
 
 
 const app = express()
-logger.info(`Environment un app.js: ${process.env.NODE_ENV}`)
+logger.info(`Environment on app.js: ${process.env.NODE_ENV}`)
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -33,6 +34,7 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
   })
 
 app.use('/api/blogs', blogsRouter)
+app.use('/api/users', usersRouter)
 app.use(middleware.unknownEndpoint)
 app.use(middleware.errorHandler)
 

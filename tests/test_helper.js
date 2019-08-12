@@ -1,4 +1,5 @@
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const initialBlogs = [
   {
@@ -56,7 +57,17 @@ const blogsInDb = async () => {
   return blogs.map(blog => blog.toJSON())
 }
 
+const usersInDb = async () => {
+  const users = await User.find({})
+  return users.map(u => u.toJSON())
+}
+
+// eslint-disable-next-line max-len
+const equalTo = blog => b => b.author === blog.author && b.title === blog.title && b.url === blog.url
+
 module.exports = {
   initialBlogs,
+  equalTo,
   blogsInDb,
+  usersInDb,
 }

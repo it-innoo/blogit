@@ -1,10 +1,13 @@
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
-const { initialBlogs, blogsInDb } = require('./test_helper')
+const {
+  equalTo, initialBlogs, blogsInDb, usersInDb,
+} = require('./test_helper')
 
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 beforeEach(async () => {
   await Blog.deleteMany({})
@@ -14,6 +17,7 @@ beforeEach(async () => {
   const promiseArray = blogObjects.map(blog => blog.save())
   await Promise.all(promiseArray)
 })
+
 
 afterAll(() => {
   mongoose.connection.close()
@@ -79,11 +83,9 @@ describe('adding a new blog to bloglist', () => {
 
     const blogsAtEnd = await blogsInDb()
 
-    const likes = blogsAtEnd
-      .filter(r => r.title === newBlog.title)
-      .map(r => r.likes)
+    const created = blogsAtEnd.find(equalTo(newBlog))
 
-    expect(likes[0]).toBe(0)
+    expect(created.likes).toBe(0)
   })
 
   it('blog is not added without title', async () => {
@@ -164,5 +166,34 @@ describe('update a blog in bloglist', () => {
     const blogsAtEnd = await blogsInDb()
     const blog = blogsAtEnd[0]
     expect(blog.likes).toBe(likes + 1)
+  })
+})
+
+describe('When there is initially one user at userDb', () => {
+  beforeEach(async () => {
+    await User.remove({})
+    const user = new User({ username: 'root', password: 'sekret' })
+    await user.save()
+  })
+  test('creation succeeds with a fresh username', async () => {
+    const usersAtStart = await usersInDb()
+
+    const newUser = {
+      username: 'mluukkai',
+      name: 'Matti Luukkainen',
+      password: 'salainen',
+    }
+
+    await api
+      .post('/api/users')
+      .send(newUser)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    const usersAtEnd = await usersInDb()
+    expect(usersAtEnd.length).toBe(usersAtStart.length + 1)
+
+    const usernames = usersAtEnd.map(u => u.username)
+    expect(usernames).toContain(newUser.username)
   })
 })
