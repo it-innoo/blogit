@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
@@ -9,17 +10,25 @@ const api = supertest(app)
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
+let token
+
 beforeEach(async () => {
   await Blog.deleteMany({})
+
+  await User.deleteMany({})
+  const user = new User({ username: 'root', password: 'sekret' })
+  const savedUser = await user.save()
+
+  const userForToken = {
+    username: savedUser.username,
+    id: savedUser._id,
+  }
+  token = jwt.sign(userForToken, process.env.SECRET)
 
   const blogObjects = initialBlogs
     .map(blog => new Blog(blog))
   const promiseArray = blogObjects.map(blog => blog.save())
   await Promise.all(promiseArray)
-
-  await User.deleteMany({})
-  const user = new User({ username: 'root', password: 'sekret' })
-  await user.save()
 })
 
 
@@ -60,6 +69,7 @@ describe('Blogit Backend Tests', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -84,7 +94,10 @@ describe('Blogit Backend Tests', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
 
       const blogsAtEnd = await blogsInDb()
 
@@ -102,6 +115,7 @@ describe('Blogit Backend Tests', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(400)
         .expect('Content-Type', /application\/json/)
@@ -120,6 +134,7 @@ describe('Blogit Backend Tests', () => {
 
       await api
         .post('/api/blogs')
+        .set('Authorization', `Bearer ${token}`)
         .send(newBlog)
         .expect(400)
         .expect('Content-Type', /application\/json/)
