@@ -45,7 +45,36 @@ router.post('/', async (request, response, next) => {
 })
 
 router.delete('/:id', async (request, response, next) => {
+  const { token } = request
+
   try {
+    const decodedToken = await jwt
+      .verify(token, process.env.SECRET)
+    if (!decodedToken || !decodedToken.id) {
+      return response
+        .status(401)
+        .json({ error: 'token missing or invalid' })
+        .end()
+    }
+
+    const user = await User.findById(decodedToken.id)
+    const blog = await Blog.findById(request.params.id)
+
+    if (!blog) {
+      return response
+        .status(404)
+        .json({ error: 'blog not found' })
+        .end()
+    }
+
+    const tokenUser = blog.user
+    if (JSON.stringify(user) === JSON.stringify(tokenUser)) {
+      return response
+        .status(401)
+        .json({ error: 'wrong authentication' })
+        .end()
+    }
+
     await Blog.findByIdAndRemove(request.params.id)
     return response
       .status(204)

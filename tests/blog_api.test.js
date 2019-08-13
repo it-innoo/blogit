@@ -145,13 +145,14 @@ describe('Blogit Backend Tests', () => {
     })
   })
 
-  describe('delete a blog from bloglist', () => {
+  describe('a blog can be deleted', () => {
     it('succeeds with status code 204 if id is valid', async () => {
       const blogsAtStart = await blogsInDb()
       const blogToDelete = blogsAtStart[0]
 
       await api
         .delete(`/api/blogs/${blogToDelete.id}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(204)
 
       const blogsAtEnd = await blogsInDb()
@@ -165,7 +166,25 @@ describe('Blogit Backend Tests', () => {
     it('fails with status code 400 if id is invalid', async () => {
       await api
         .delete('/api/blogs/1')
+        .set('Authorization', `Bearer ${token}`)
         .expect(400)
+        .expect('Content-Type', /application\/json/)
+
+      const blogsAtEnd = await blogsInDb()
+      expect(blogsAtEnd.length)
+        .toBe(initialBlogs.length)
+    })
+
+    it('fails with status code 401 if token is invalid', async () => {
+      await api
+        .delete('/api/blogs/1')
+        .set('Authorization', 'Bearer 123456789')
+        .expect(401)
+        .expect('Content-Type', /application\/json/)
+
+      const blogsAtEnd = await blogsInDb()
+      expect(blogsAtEnd.length)
+        .toBe(initialBlogs.length)
     })
   })
 
