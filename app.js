@@ -5,10 +5,12 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const morgan = require('morgan')
 const config = require('./utils/config')
-const blogsRouter = require('./controllers/blogs')
-const usersRouter = require('./controllers/users')
-const middleware = require('./utils/middleware')
 const logger = require('./utils/logger')
+
+const blogsRouter = require('./controllers/blogs')
+const loginRouter = require('./controllers/login')
+const usersRouter = require('./controllers/users')
+const { errorHandler, unknownEndpoint } = require('./utils/middleware')
 
 
 const app = express()
@@ -34,9 +36,11 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
     logger.error('error connecting to MongoDB:', error.message)
   })
 
+app.use('/api/login', loginRouter)
 app.use('/api/blogs', blogsRouter)
 app.use('/api/users', usersRouter)
-app.use(middleware.unknownEndpoint)
-app.use(middleware.errorHandler)
+
+app.use(unknownEndpoint)
+app.use(errorHandler)
 
 module.exports = app
