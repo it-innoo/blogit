@@ -3,15 +3,6 @@ const router = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
-const getTokenFrom = (request) => {
-  const authorization = request.get('authorization')
-
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    return authorization.substring(7)
-  }
-
-  return null
-}
 
 router.get('/', async (request, response) => {
   const blogs = await Blog
@@ -21,8 +12,7 @@ router.get('/', async (request, response) => {
 })
 
 router.post('/', async (request, response, next) => {
-  const { body } = request
-  const token = getTokenFrom(request)
+  const { body, token } = request
 
   try {
     const decodedToken = await jwt

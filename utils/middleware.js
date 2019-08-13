@@ -1,5 +1,20 @@
 const logger = require('./logger')
 
+const getTokenFrom = (request) => {
+  const authorization = request.get('authorization')
+
+  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
+    return authorization.substring(7)
+  }
+
+  return null
+}
+
+const tokenExtractor = (request, response, next) => {
+  request.token = getTokenFrom(request)
+  next()
+}
+
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: `Not Found: ${request.url}` })
 }
@@ -19,6 +34,7 @@ const errorHandler = (error, request, response, next) => {
 }
 
 module.exports = {
-  unknownEndpoint,
   errorHandler,
+  tokenExtractor,
+  unknownEndpoint,
 }

@@ -10,7 +10,7 @@ const logger = require('./utils/logger')
 const blogsRouter = require('./controllers/blogs')
 const loginRouter = require('./controllers/login')
 const usersRouter = require('./controllers/users')
-const { errorHandler, unknownEndpoint } = require('./utils/middleware')
+const { errorHandler, tokenExtractor, unknownEndpoint } = require('./utils/middleware')
 
 
 const app = express()
@@ -35,6 +35,8 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true })
   .catch((error) => {
     logger.error('error connecting to MongoDB:', error.message)
   })
+
+app.use(tokenExtractor)
 
 app.use('/api/login', loginRouter)
 app.use('/api/blogs', blogsRouter)
